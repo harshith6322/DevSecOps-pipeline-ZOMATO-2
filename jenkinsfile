@@ -1,0 +1,98 @@
+pipeline{
+
+    tools {
+      nodejs 'nodejs_tool'
+      jdk 'jdk_tool'
+    }
+
+    agent{
+        label {
+          label "slave-1"
+          retries 3
+        }
+    }
+    
+
+
+    environment {
+        SCANNER_HOME = tool 'mysonar_tool'
+    }
+
+
+    stages{
+        stage("Clean Workspace"){
+
+            steps{
+                CleanWork()
+            }
+        }
+
+        stage("Code"){
+
+            steps{
+                git branch: 'main', url: 'https://github.com/harshith6322/DevSecOps-pipeline-ZOMATO-2.git'
+            }
+        }
+
+        stage("CQA"){
+
+            steps{
+
+                script{
+
+                    withSonarQubeEnv("mysonar_server") {
+                        sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=ZOMATO_PROJECT '''
+
+                    }
+                }
+            }
+
+        }
+
+        stage("Quality Gate"){
+
+            steps{
+
+                script{
+
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar_token'
+                }
+            }
+        }
+
+
+        stage("OWASP"){
+
+            steps{
+
+               dependencyCheck additionalArguments: '''
+               --scan ./package.json \
+               --scan ./package-lock.json \
+               --exclude **/node_modules/** \
+               --format ALL \
+               --out dependency-check-reports''',
+               odcInstallation: 'dpc_tool'
+               dependencyCheckPublisher pattern: 'dependency-check-reports/dependency-check-report.xml'
+
+            }
+        }
+
+        stage("Install dep"){
+            steps{
+                sh "npm install --frozen-lockfile"
+            }
+
+        }
+
+        steps("Nexus artifacts"){
+
+            steps{
+                sh "echo storing builds..."
+            }
+        }
+
+
+        
+
+    }
+}
