@@ -84,7 +84,7 @@ pipeline{
 
         }
 
-        steps("Nexus artifacts"){
+        stage("Nexus artifacts"){
 
             steps{
                 sh "echo storing builds..."
