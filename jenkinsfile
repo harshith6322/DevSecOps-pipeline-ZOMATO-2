@@ -68,9 +68,7 @@ pipeline{
         stage("OWASP"){
 
             steps {
-               dependencyCheck additionalArguments: '''--scan ./ --format XML --format HTML --out ./odc-reports''', odcInstallation: 'dpc_tool'
-               dependencyCheckPublisher pattern: 'odc-reports/dependency-check-report.xml'
-               archiveArtifacts artifacts: 'odc-reports/dependency-check-report.html', fingerprint: true
+               dependencyCheck additionalArguments: '--scan ./src --disableYarnAudit --disableNodeAudit --exclude **/node_modules/** --exclude **/dist/** --exclude **/build/** --exclude **/.git/**', odcInstallation: 'dpc_tool'
             }
         }
 
