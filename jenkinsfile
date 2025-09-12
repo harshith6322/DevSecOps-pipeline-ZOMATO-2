@@ -42,10 +42,9 @@ pipeline{
 
                     withSonarQubeEnv("mysonar_server") {
 
-                        sh  ''' 
-                              ${scannerHome}/bin/sonar-scanner \
-                              -Dsonar.projectKey=ZOMATO_PROJECT \
-                              -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/.git/**,**/coverage/**,**/*.min.js
+                        sh  '''${scannerHome}/bin/sonar-scanner \
+                               -Dsonar.projectKey=ZOMATO_PROJECT \
+                               -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/.git/**,**/coverage/**,**/*.min.js
                             '''
 
                     }
