@@ -6,7 +6,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production
-FROM nginx:1.27.0-alpine AS prod
+FROM nginx:stable-alpine AS prod
 WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
 COPY --chown=nginx:nginx --from=build /app/dist .
