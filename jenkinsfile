@@ -1,157 +1,175 @@
-pipeline {
-  agent { label 'slave-1' }
+@Library("email_lib") _ 
+pipeline{
 
-  tools {
-    nodejs 'nodejs_tool'
-    jdk 'jdk_tool'
-  }
-
-  environment {
-    USERNAME_DOCKER = "harshithreddy6322"
-    IMAGE_NAME      = "ZOMATOAPP"
-    IMAGE_TAG       = "${BUILD_ID}"
-    NEXUS_URL       = "http://34.229.11.25:8081"
-    NEXUS_REPO      = "react_build_storage"
-  }
-
-  stages {
-    stage("Clean Workspace") {
-      steps { cleanWs() }
+    tools {
+      nodejs 'nodejs_tool'
+      jdk 'jdk_tool'
     }
 
-    stage("Checkout") {
-      steps {
-        git branch: 'main', url: 'https://github.com/harshith6322/DevSecOps-pipeline-ZOMATO-2.git'
-      }
-    }
-
-    stage("SonarQube Analysis") {
-      steps {
-        script {
-          // obtain sonar-scanner tool path on the agent at runtime
-          def scannerHome = tool name: 'mysonar_tool', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-
-          withSonarQubeEnv('mysonar_server') {
-            sh """
-              ${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=ZOMATO_PROJECT \
-                -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/.git/**,**/coverage/**,**/*.min.js
-            """
-          }
+    agent{
+        label {
+          label "slave-1"
+          retries 3
         }
-      }
+    }
+    
+
+
+    environment {
+        SCANNER_HOME = tool 'mysonar_tool'
+
+        USERNAME_DOCKER="harshithreddy6322"
+        IMAGE_TAG="${BUILD_ID}"
+        IMAGE_NAME="ZOMATOAPP"
+
+
+
     }
 
-    stage("Quality Gate") {
-      steps {
-        script {
-          // wait for Sonar to call back via webhook, timeout to avoid hanging forever
-          timeout(time: 3, unit: 'MINUTES') {
-            def qg = waitForQualityGate()
-            echo "SonarQube status: ${qg.status}"
-            if (qg.status != 'OK') {
-              error "Quality Gate failed: ${qg.status}"
+
+    stages{
+        stage("Clean Workspace"){
+            steps{
+                cleanWs()
             }
-          }
         }
-      }
-    }
 
-    stage("Install & Build") {
-      steps {
-        sh '''
-          npm ci
-          npm run build
-          zip -r frontend-${IMAGE_TAG}.zip build/
-        '''
-      }
-    }
 
-    stage("Audit") {
-      steps {
-        // create npm audit report (needs package-lock.json). allow non-zero but keep report
-        sh 'npm audit --json > npm-audit-report.json || true'
-      }
-    }
-
-    stage("Test") {
-      steps {
-        sh 'npm test || true'
-      }
-    }
-
-    stage("Upload artifact to Nexus") {
-      steps {
-        script {
-          // use BUILD_ID as version so uploads are unique
-          nexusArtifactUploader(
-            artifacts: [[
-              artifactId: 'react-frontend',
-              classifier: '',
-              file: "frontend-${IMAGE_TAG}.zip",
-              type: 'zip'
-            ]],
-            credentialsId: 'nexsus_token',          // ensure this credential exists
-            groupId: 'com.mycompany.react',
-            nexusUrl: '34.229.11.25:8081',
-            nexusVersion: 'nexus3',
-            protocol: 'http',
-            repository: "${NEXUS_REPO}",
-            version: "${IMAGE_TAG}"
-          )
+        stage("Code"){
+            steps{
+                git branch: 'main', url: 'https://github.com/harshith6322/DevSecOps-pipeline-ZOMATO-2.git'
+            }
         }
-      }
-    }
 
-    stage('Build Docker Image') {
-      steps {
-        sh "docker build -t ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} ."
-      }
-    }
 
-    stage('Trivy Scan') {
-      steps {
-        // save trivy output; allow failure
-        sh "trivy image ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} > trivy_scan_ouput.txt || true"
-      }
-    }
+        stage("CQA"){
+            steps{
 
-    stage('Push Docker Image') {
-      steps {
-        // push using Docker registry credentials configured in Jenkins
-        withDockerRegistry(credentialsId: 'docker_token') {
-          sh "docker push ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                script{
+
+                    withSonarQubeEnv("mysonar_server") {
+                        sh """
+                            ${SCANNER_HOME}/bin/sonar-scanner \
+                            -Dsonar.projectKey=ZOMATO_PROJECT \
+                            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/.git/**,**/coverage/**,**/*.min.js \
+                         """  
+
+                    }
+                }
+            }
+
         }
-      }
-    }
 
-    stage('Quick Run Smoke') {
-      steps {
-        script {
-          // run ephemeral container to smoke-test; use a fixed container name so we can remove it later
-          def cname = "ci-smoke-${IMAGE_TAG}"
-          sh "docker run -d --name ${cname} -p 80:80 ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} || true"
-          sh "sleep 30"
-          sh "docker rm -f ${cname} || true"
+
+        stage("Quality Gate"){
+            steps{
+
+                script{
+
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar_token'
+                }
+            }
         }
-      }
-    }
-  }
 
-  post {
-    always {
-      script {
-        // ensure the attachment files exist before sending (optional)
-        sh 'ls -lah npm-audit-report.json || true; ls -lah trivy_scan_ouput.txt || true; ls -lah frontend-*.zip || true'
+
+        stage("Install Dep"){
+            steps{
+
+                sh '''
+                    npm ci
+                    npm run build
+                    zip -r frontend-1.0.0.zip build/
+                '''
+           
+            }
+
+        }
+
+
+          stage("Audit"){
+            steps {
+
+               sh "npm audit --json > npm-audit-report.json || true"
+            }
+        }
+
+
+        stage("Test"){
+            steps{
+                sh "npm test || true"
+            }
+        }
+
+
+        stage("Nexus artifacts"){
+            steps{
+
+                nexusArtifactUploader artifacts: [[artifactId: 'react-frontend', classifier: '', file: 'frontend-1.0.0.zip', type: 'zip']], credentialsId: 'nexsus_token', groupId: 'com.mycompany.react', nexusUrl: '34.229.11.25:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'react_build_storage', version: 'v1'         
+            }
+        }
+
+
+        stage('Build Docker Image') {
+            steps {
+               
+                sh "docker build -t ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+
+                   
+            }
+        }
+
+        stage('Trivy') {
+            steps {
+               
+                sh "trivy image ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} >> trivy_scan_ouput.txt"
+                
+                   
+            }
+        }
+
+
+        stage("Docker Image"){
+            steps{
+
+                withDockerRegistry(credentialsId: 'docker_token', url: 'https://hub.docker.com/repositories/harshithreddy6322') {
+
+                 // some block
+                  sh "docker push ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                  }
+
+            }
+        }
+
+
+        stage("Pull image"){
+            steps{
+
+                sh "docker pull ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker run -itd -p 80:80 ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "sleep 2m"
+                sh "docker rm -f ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+            }
+
+        }
+
+
+        post{
+            always {
+               script {
+                   // ensure the attachment files exist before sending (optional)
+                    sh 'ls -lah npm-audit-report.json || true; ls -lah trivy_scan_ouput.txt || true; ls -lah frontend-*.zip || true'
 
         
-        sendEmail([
-          to: 'harshithreddy6322@gmail.com,rrchennareddy1971@gmail.com',
-          subject: "${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
-          body: "<p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> finished with status: <b>${currentBuild.currentResult}</b>.</p><p><a href='${env.BUILD_URL}'>Open build</a></p>",
-          attachments: "npm-audit-report.json,trivy_scan_ouput.txt,frontend-${IMAGE_TAG}.zip"
-        ])
-      }
+                  sendEmail([
+                    to: 'harshithreddy6322@gmail.com,rrchennareddy1971@gmail.com',
+                    subject: "${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+                    body: "<p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> finished with status: <b>${currentBuild.currentResult}</b>.</p><p><a href='${env.BUILD_URL}'>Open build</a></p>",
+                    attachments: "npm-audit-report.json,trivy_scan_ouput.txt,frontend-${IMAGE_TAG}.zip"
+                   ])
+               }
+            }
+        }
+
     }
-  }
 }
