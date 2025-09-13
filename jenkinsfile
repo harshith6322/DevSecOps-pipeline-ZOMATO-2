@@ -104,7 +104,7 @@ pipeline{
         stage("Nexus artifacts"){
             steps{
 
-                nexusArtifactUploader(nexusVersion: 'nexus3',protocol: 'http',nexusUrl: '34.229.11.25:8081',repository: 'react_build_storage',credentialsId: 'nexsus_token',groupId: '',version: "${IMAGE_TAG}",artifacts: [[artifactId: 'react-frontend',classifier: '',file: "frontend-${IMAGE_TAG}.zip",type: 'zip']]
+                nexusArtifactUploader(nexusVersion: 'nexus3',protocol: 'http',nexusUrl: '34.229.11.25:8081',repository: 'react_build_storage',credentialsId: 'nexsus_token',groupId: '',version: "${IMAGE_TAG}",artifacts: [[artifactId: '',classifier: '',file: "frontend-${IMAGE_TAG}.zip",type: 'zip']]
                 )         
             }
         }
