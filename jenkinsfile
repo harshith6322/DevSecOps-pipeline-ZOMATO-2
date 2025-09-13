@@ -68,15 +68,6 @@ pipeline{
         }
 
 
-        stage("Audit"){
-
-            steps {
-
-               sh "npm audit --json > npm-audit-report.json"
-            }
-        }
-
-
         stage("Install dep"){
 
             steps{
@@ -85,6 +76,15 @@ pipeline{
            
             }
 
+        }
+
+        
+          stage("Audit"){
+
+            steps {
+
+               sh "npm audit --json > npm-audit-report.json"
+            }
         }
 
 
@@ -99,7 +99,8 @@ pipeline{
         stage("Nexus artifacts"){
 
             steps{
-                sh "echo storing builds..."
+
+                nexusArtifactUploader artifacts: [[artifactId: 'react-frontend', classifier: '', file: 'frontend-1.0.0.zip', type: 'zip']], credentialsId: 'nexsus_token', groupId: 'com.mycompany.react', nexusUrl: '34.229.11.25:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'react_build_storage', version: 'v1'         
             }
         }
 
