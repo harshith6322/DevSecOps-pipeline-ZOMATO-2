@@ -1,4 +1,3 @@
-@Library("email_lib") _
 pipeline {
   agent { label 'slave-1' }
 
@@ -145,8 +144,7 @@ pipeline {
         // ensure the attachment files exist before sending (optional)
         sh 'ls -lah npm-audit-report.json || true; ls -lah trivy_scan_ouput.txt || true; ls -lah frontend-*.zip || true'
 
-        // use your shared-lib helper (email_lib) to send simple email to two people
-        // the shared lib should be defined to accept 'to' and 'attachments' keys
+        
         sendEmail([
           to: 'harshithreddy6322@gmail.com,rrchennareddy1971@gmail.com',
           subject: "${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
