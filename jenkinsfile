@@ -81,9 +81,8 @@ pipeline{
 
             steps{
 
-                sh "npm install --frozen-lockfile"
-                sh "npm run build"
-                sh "npm install --package-lock-only"
+                sh "npm install --frozen-lockfile && npm install --package-lock-only && npm run build && zip -r frontend-1.0.0.zip dist/"
+           
             }
 
         }
