@@ -113,11 +113,13 @@ pipeline{
         stage('Build Docker Image') {
             steps {
                
-                withDockerRegistry(credentialsId: 'docker_token', url: 'https://hub.docker.com/repositories/harshithreddy6322') {
+                withDockerRegistry(credentialsId: 'docker_token') {
 
-                sh "docker build --tag ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} ."
-                 // some block
-                //   sh "docker push ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                   sh "docker build --tag ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    // some block
+                   //   sh "docker push ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                   sh "docker push ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                   
                   }
                    
             }
@@ -132,18 +134,6 @@ pipeline{
             }
         }
 
-
-        stage("Docker Image"){
-            steps{
-
-                withDockerRegistry(credentialsId: 'docker_token', url: 'https://hub.docker.com/repositories/harshithreddy6322') {
-
-                 // some block
-                  sh "docker push ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
-                  }
-
-            }
-        }
 
 
         stage("Pull image"){
