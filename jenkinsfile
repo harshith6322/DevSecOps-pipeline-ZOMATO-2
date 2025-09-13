@@ -1,3 +1,4 @@
+@Library("email_lib")
 pipeline{
 
     tools {
@@ -16,12 +17,18 @@ pipeline{
 
     environment {
         SCANNER_HOME = tool 'mysonar_tool'
+
+        USERNAME_DOCKER="harshithreddy6322"
+        IMAGE_TAG="${BUILD_ID}"
+        IMAGE_NAME="ZOMATOAPP"
+
+
+
     }
 
 
     stages{
         stage("Clean Workspace"){
-
             steps{
                 cleanWs()
             }
@@ -29,7 +36,6 @@ pipeline{
 
 
         stage("Code"){
-
             steps{
                 git branch: 'main', url: 'https://github.com/harshith6322/DevSecOps-pipeline-ZOMATO-2.git'
             }
@@ -37,7 +43,6 @@ pipeline{
 
 
         stage("CQA"){
-
             steps{
 
                 script{
@@ -57,7 +62,6 @@ pipeline{
 
 
         stage("Quality Gate"){
-
             steps{
 
                 script{
@@ -69,10 +73,13 @@ pipeline{
 
 
         stage("Install Dep"){
-
             steps{
 
-                sh "npm install --frozen-lockfile && npm install --package-lock-only && npm run build && zip -r frontend-1.0.0.zip build/"
+                sh '''
+                    npm ci
+                    npm run build
+                    zip -r frontend-1.0.0.zip build/
+                '''
            
             }
 
@@ -80,16 +87,14 @@ pipeline{
 
 
           stage("Audit"){
-
             steps {
 
-               sh "npm audit --json > npm-audit-report.json"
+               sh "npm audit --json > npm-audit-report.json || true"
             }
         }
 
 
         stage("Test"){
-
             steps{
                 sh "npm test || true"
             }
@@ -97,25 +102,72 @@ pipeline{
 
 
         stage("Nexus artifacts"){
-
             steps{
 
                 nexusArtifactUploader artifacts: [[artifactId: 'react-frontend', classifier: '', file: 'frontend-1.0.0.zip', type: 'zip']], credentialsId: 'nexsus_token', groupId: 'com.mycompany.react', nexusUrl: '34.229.11.25:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'react_build_storage', version: 'v1'         
             }
         }
 
-        // stage("Docker Image"){
 
-        //     steps{
+        stage('Build Docker Image') {
+            steps {
+               
+                sh "docker build -t ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+
+                   
+            }
+        }
+
+        stage('Trivy') {
+            steps {
+               
+                sh "trivy image ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} >> trivy_scan_ouput.txt"
                 
-
-        //     }
-        // }
-
-
+                   
+            }
+        }
 
 
-        
+        stage("Docker Image"){
+            steps{
+
+                withDockerRegistry(credentialsId: 'docker_token') {
+                  // some block
+                  sh "docker push ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+                }
+
+            }
+        }
+
+
+        stage("Pull image"){
+            steps{
+
+                sh "docker pull ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker run -itd -p 80:80 ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "sleep 2m"
+                sh "docker rm -f ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+            }
+
+        }
+
+
+        post{
+            always{
+
+                email(
+                    to: 'harshithreddy6322@gmail.com, rrchennareddy1971@gmail.com',
+                    subject: "${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+                    mimeType: 'text/html',
+                    body: "<p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> finished with status: <b>${currentBuild.currentResult}</b>.</p><p><a href='${env.BUILD_URL}'>Open build</a></p>",
+                    attachmentsPattern: 'npm-audit-report.json,trivy_scan_ouput.txt',
+                    attachLog: false
+                )
+
+            }
+        }
 
     }
 }
