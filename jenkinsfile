@@ -113,7 +113,7 @@ pipeline{
         stage('Build Docker Image') {
             steps {
                
-                sh "docker build -t ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                sh "docker build --tag ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} ."
 
                    
             }
