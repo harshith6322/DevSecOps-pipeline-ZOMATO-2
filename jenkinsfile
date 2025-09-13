@@ -20,7 +20,7 @@ pipeline{
 
         USERNAME_DOCKER="harshithreddy6322"
         IMAGE_TAG="${BUILD_ID}"
-        IMAGE_NAME="ZOMATOAPP"
+        IMAGE_NAME="zomatoapp"
 
 
 
