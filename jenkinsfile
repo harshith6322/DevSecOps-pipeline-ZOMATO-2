@@ -83,7 +83,7 @@ pipeline{
 
                 sh "npm install --frozen-lockfile"
                 sh "npm run build"
-                sh "npm i --package-lock-only"
+                sh "npm install --package-lock-only"
             }
 
         }
