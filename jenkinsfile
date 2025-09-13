@@ -68,17 +68,17 @@ pipeline{
         }
 
 
-        stage("Install dep"){
+        stage("Install Dep"){
 
             steps{
 
-                sh "npm install --frozen-lockfile && npm install --package-lock-only && npm run build && zip -r frontend-1.0.0.zip dist/"
+                sh "npm install --frozen-lockfile && npm install --package-lock-only && npm run build && zip -r frontend-1.0.0.zip build/"
            
             }
 
         }
 
-        
+
           stage("Audit"){
 
             steps {
@@ -88,7 +88,7 @@ pipeline{
         }
 
 
-        stage("test"){
+        stage("Test"){
 
             steps{
                 sh "npm test || true"
