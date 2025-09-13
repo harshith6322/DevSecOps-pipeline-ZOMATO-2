@@ -154,21 +154,21 @@ pipeline{
         }
 
 
-        post {
-  always {
-    script {
-      // ensure the attachment files exist before sending (optional)
-      sh 'ls -lah npm-audit-report.json || true; ls -lah trivy_scan_ouput.txt || true; ls -lah frontend-*.zip || true'
+//         post {
+//   always {
+//     script {
+//       // ensure the attachment files exist before sending (optional)
+//       sh 'ls -lah npm-audit-report.json || true; ls -lah trivy_scan_ouput.txt || true; ls -lah frontend-*.zip || true'
 
-      sendEmail([
-        to: 'harshithreddy6322@gmail.com,rrchennareddy1971@gmail.com',
-        subject: "${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
-        body: "<p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> finished with status: <b>${currentBuild.currentResult}</b>.</p><p><a href='${env.BUILD_URL}'>Open build</a></p>",
-        attachments: "npm-audit-report.json,trivy_scan_ouput.txt,frontend-${env.IMAGE_TAG}.zip"
-      ])
-    }
-  }
-}
+//       sendEmail([
+//         to: 'harshithreddy6322@gmail.com,rrchennareddy1971@gmail.com',
+//         subject: "${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+//         body: "<p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> finished with status: <b>${currentBuild.currentResult}</b>.</p><p><a href='${env.BUILD_URL}'>Open build</a></p>",
+//         attachments: "npm-audit-report.json,trivy_scan_ouput.txt,frontend-${env.IMAGE_TAG}.zip"
+//       ])
+//     }
+//   }
+// }
 
     }
 }
