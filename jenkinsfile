@@ -83,6 +83,7 @@ pipeline{
 
                 sh "npm install --frozen-lockfile"
                 sh "npm run build"
+                sh "npm i --package-lock-only"
             }
 
         }
@@ -94,7 +95,7 @@ pipeline{
                 sh "npm test || true"
             }
         }
-        
+
 
         stage("Nexus artifacts"){
 
