@@ -113,7 +113,8 @@ pipeline{
         stage('Build Docker Image') {
             steps {
                
-                withDockerRegistry(credentialsId: 'docker_token') {
+                script{
+                    withDockerRegistry(credentialsId: 'docker_token') {
 
                    sh "docker build --tag ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} ."
                     // some block
@@ -121,6 +122,7 @@ pipeline{
                    sh "docker push ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
                    
                   }
+                }
                    
             }
         }
