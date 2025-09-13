@@ -76,7 +76,7 @@ pipeline{
             steps{
 
                 sh '''
-                    npm ci
+                    npm install
                     npm run build
                     zip -r frontend-1.0.0.zip build/
                 '''
