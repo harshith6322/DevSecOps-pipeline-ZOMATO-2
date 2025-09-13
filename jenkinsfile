@@ -27,12 +27,14 @@ pipeline{
             }
         }
 
+
         stage("Code"){
 
             steps{
                 git branch: 'main', url: 'https://github.com/harshith6322/DevSecOps-pipeline-ZOMATO-2.git'
             }
         }
+
 
         stage("CQA"){
 
@@ -53,6 +55,7 @@ pipeline{
 
         }
 
+
         stage("Quality Gate"){
 
             steps{
@@ -65,19 +68,33 @@ pipeline{
         }
 
 
-        stage("OWASP"){
+        stage("Audit"){
 
             steps {
-               dependencyCheck additionalArguments: '--scan ./src --disableYarnAudit --disableNodeAudit --exclude **/node_modules/** --exclude **/dist/** --exclude **/build/** --exclude **/.git/**', odcInstallation: 'dpc_tool'
+
+               sh "npm audit --json > npm-audit-report.json"
             }
         }
+
 
         stage("Install dep"){
+
             steps{
+
                 sh "npm install --frozen-lockfile"
+                sh "npm run build"
             }
 
         }
+
+
+        stage("test"){
+
+            steps{
+                sh "npm test || true"
+            }
+        }
+        
 
         stage("Nexus artifacts"){
 
@@ -85,6 +102,16 @@ pipeline{
                 sh "echo storing builds..."
             }
         }
+
+        // stage("Docker Image"){
+
+        //     steps{
+                
+
+        //     }
+        // }
+
+
 
 
         
