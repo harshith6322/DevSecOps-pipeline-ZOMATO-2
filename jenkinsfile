@@ -104,7 +104,7 @@ pipeline{
         stage("Nexus artifacts"){
             steps{
 
-                nexusArtifactUploader artifacts: [[artifactId: 'react-frontend', classifier: '', file: 'frontend-1.0.0.zip', type: 'zip']], credentialsId: 'nexsus_token', groupId: 'com.mycompany.react', nexusUrl: '34.229.11.25:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'react_build_storage', version: 'v1'         
+                nexusArtifactUploader artifacts: [[artifactId: 'react-frontend', classifier: '', file: 'frontend-1.0.0.zip', type: 'zip']], credentialsId: 'nexsus_token', groupId: 'com.mycompany.react', nexusUrl: '34.229.11.25:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'react_build_storage', version: "${IMAGE_TAG}"         
             }
         }
 
