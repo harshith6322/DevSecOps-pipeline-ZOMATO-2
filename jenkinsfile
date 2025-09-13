@@ -113,8 +113,12 @@ pipeline{
         stage('Build Docker Image') {
             steps {
                
-                sh "docker build --tag ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                withDockerRegistry(credentialsId: 'docker_token', url: 'https://hub.docker.com/repositories/harshithreddy6322') {
 
+                sh "docker build --tag ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                 // some block
+                //   sh "docker push ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                  }
                    
             }
         }
@@ -153,12 +157,6 @@ pipeline{
             }
 
         }
-
-        
-
- 
-
-
 
     }
 
