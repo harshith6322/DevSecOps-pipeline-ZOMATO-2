@@ -9,6 +9,6 @@ RUN npm run build
 FROM nginx:stable-alpine AS prod
 WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
-COPY --chown=nginx:nginx --from=build /app/dist .
+COPY --chown=nginx:nginx --from=builder /app/build .
 EXPOSE 3000
 CMD [ "ngnix", "-g" ,"daemon off;" ]
