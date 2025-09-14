@@ -142,9 +142,9 @@ pipeline{
             steps{
 
                 sh "docker pull ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
-                sh "docker run -itd -p 80:80 ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker run -itd -p 80:80 --name zomato ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
                 sh "sleep 2m"
-                sh "docker rm -f ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker rm -f zomato"
 
             }
 
@@ -152,26 +152,26 @@ pipeline{
 
     }
 
-    post {
-  always {
-    emailext(
-      subject: "Pipeline Status: ${BUILD_NUMBER}",
-      body: """<html>
-        <body>
-          <p>Build Status: ${BUILD_STATUS}</p>
-          <p>Build Number: ${BUILD_NUMBER}</p>
-          <p>Check the <a href="${BUILD_URL}">console output</a>.</p>
-        </body>
-      </html>""",
-      to: 'harshithreddy6322@gmail.com,noreply.jenkins2025@gmail.com',
-      from: 'noreply.jenkins2025@gmail.com',
-      replyTo: 'noreply.jenkins2025@gmail.com',
-      mimeType: 'text/html',
-      attachmentsPattern: 'npm-audit-report.json,trivy_scan_ouput.txt',
-      attachLog: true
-    )
-  }
+   post {
+    always {
+        emailext(
+            subject: "Pipeline Status: Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+            body: """<html>
+            <body>
+                <p><b>Build Status:</b> ${currentBuild.currentResult}</p>
+                <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
+                <p>Check the <a href="${env.BUILD_URL}">console output</a>.</p>
+            </body>
+            </html>""",
+            to: 'harshithreddy6322@gmail.com,jaiswaladi246@gmail.com',
+            from: 'noreply.jenkins2025@gmail.com',
+            replyTo: 'noreply.jenkins2025@gmail.com',
+            mimeType: 'text/html',
+            attachmentsPattern: 'npm-audit-report.json,trivy_scan_ouput.txt' // add more with comma
+        )
+    }
 }
+
 
 
    
