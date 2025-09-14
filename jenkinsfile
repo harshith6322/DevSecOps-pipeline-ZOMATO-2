@@ -163,7 +163,7 @@ pipeline{
           <p>Check the <a href="${BUILD_URL}">console output</a>.</p>
         </body>
       </html>""",
-      to: 'harshithreddy6322@gmail.com',
+      to: 'harshithreddy6322@gmail.com,noreply.jenkins2025@gmail.com',
       from: 'noreply.jenkins2025@gmail.com',
       replyTo: 'noreply.jenkins2025@gmail.com',
       mimeType: 'text/html',
