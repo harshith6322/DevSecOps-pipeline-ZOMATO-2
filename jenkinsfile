@@ -162,7 +162,7 @@ pipeline{
                         <p><a href='${env.BUILD_URL}'>Open build</a></p>""",
                         subject: "${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
                         to: "harshithreddy6322@gmail.com"
-)
+                    )
                 }
             }
         }
