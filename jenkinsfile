@@ -152,19 +152,25 @@ pipeline{
 
     }
 
-    post{
-            always{
+   post {
+      always {
+        emailext(
+           subject: "${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+            body: """<html>
+            <body>
+             <p>Build Status: <b>${currentBuild.currentResult}</b></p>
+             <p>Build Number: ${env.BUILD_NUMBER}</p>
+             <p>Check the <a href="${env.BUILD_URL}">console output</a>.</p>
+            </body>
+            </html>""",
+         to: 'harshithreddy6322@gmail.com',
+        from: 'noreply.jenkins2025@gmail.com',
+        replyTo: 'noreply.jenkins2025@gmail.com',
+        mimeType: 'text/html',
+        attachmentsPattern: 'npm-audit-report.json,trivy_scan_ouput.txt', // comma-separated
+        attachLog: false
+    )
+  }
+}
 
-                    emailext(
-                        body: """
-                                <p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> 
-                                finished with status: <b>${currentBuild.currentResult}</b>.</p>
-                                <p><a href='${env.BUILD_URL}'>Open build</a></p>
-                            """,
-                        subject: "${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
-                        to: "harshithreddy6322@gmail.com"
-                    )
-                
-            }
-        }
 }
