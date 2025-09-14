@@ -176,7 +176,7 @@ pipeline{
             )
         }
 
-        abort{
+        aborted{
 
 
             emailext(
