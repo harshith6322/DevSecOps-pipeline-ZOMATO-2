@@ -160,6 +160,8 @@ pipeline{
                 body: getEmailBody("SUCCESS"),
                 mimeType: 'text/html',
                 to: "${RECIPIENTS}",
+                attachLog: true,
+                compressLog: true,
                 attachmentsPattern: 'npm-audit-report.json,trivy_scan_ouput.txt' 
                
             )
@@ -170,6 +172,8 @@ pipeline{
                 body: getEmailBody("FAILURE"),
                 mimeType: 'text/html',
                 to: "${RECIPIENTS}",
+                attachLog: true,
+                compressLog: true,
                 attachmentsPattern: 'npm-audit-report.json,trivy_scan_ouput.txt' 
                 
                 
@@ -184,6 +188,8 @@ pipeline{
                 body: getEmailBody("FAILURE"),
                 mimeType: 'text/html',
                 to: "${RECIPIENTS}",
+                attachLog: true,
+                compressLog: true,
                 attachmentsPattern: 'npm-audit-report.json,trivy_scan_ouput.txt' 
                 
                 
