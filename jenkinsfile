@@ -184,7 +184,7 @@ pipeline{
 
 
             emailext(
-                subject: "⚠️ Abort: ${JOB_NAME} #${BUILD_NUMBER}",
+                subject: "⚠️ Aborted: ${JOB_NAME} #${BUILD_NUMBER}",
                 body: getEmailBody("FAILURE"),
                 mimeType: 'text/html',
                 to: "${RECIPIENTS}",
