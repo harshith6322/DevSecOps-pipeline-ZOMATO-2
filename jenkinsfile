@@ -6,12 +6,14 @@ pipeline{
       jdk 'jdk_tool'
     }
 
-    agent{
-        label {
-          label "slave-1"
-          retries 3
-        }
-    }
+    agent "any"
+
+    // agent{
+    //     label {
+    //       label "slave-1"
+    //       retries 3
+    //     }
+    // }
     
 
 
@@ -66,7 +68,7 @@ pipeline{
 
                 script{
 
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar_token'
+                    waitForQualityGate abortPipeline: true, credentialsId: 'sonar_token'
                 }
             }
         }
@@ -155,7 +157,8 @@ pipeline{
     post{
             always{
                 script{
-                    emailext body: '<p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> finished with status: <b>${currentBuild.currentResult}</b>.</p><p><a href=\'${env.BUILD_URL}\'>Open build</a></p>', subject: '${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}', to: 'harshithreddy6322@gmail.com,rrchennareddy1971@gmail.com', mimeType: 'text/html'
+
+                    emailext body: '<p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> finished with status: <b>${currentBuild.currentResult}</b>.</p><p><a href=\'${env.BUILD_URL}\'>Open build</a></p>', subject: '${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}', to: 'harshithreddy6322@gmail.com', mimeType: 'text/html'
                 }
             }
         }
