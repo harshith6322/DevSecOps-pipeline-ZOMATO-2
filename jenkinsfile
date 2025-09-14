@@ -79,8 +79,6 @@ pipeline{
 
                 sh '''
                     npm install
-                    npm run build
-                    zip -r frontend-${IMAGE_TAG}.zip build/
                 '''
            
             }
