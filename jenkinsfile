@@ -154,7 +154,6 @@ pipeline{
 
     post{
             always{
-                script{
 
                     emailext(
                         body: """
@@ -165,7 +164,7 @@ pipeline{
                         subject: "${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
                         to: "harshithreddy6322@gmail.com"
                     )
-                }
+                
             }
         }
 }
