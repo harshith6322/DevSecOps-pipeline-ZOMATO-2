@@ -142,9 +142,9 @@ pipeline{
             steps{
 
                 sh "docker pull ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
-                sh "docker run -itd -p 80:80 --name zomato ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker run -itd -p 80:80  --name ${IMAGE_NAME} ${USERNAME_DOCKER}/${IMAGE_NAME}:${IMAGE_TAG}"
                 sh "sleep 2m"
-                sh "docker rm -f zomato"
+                sh "docker rm -f ${IMAGE_NAME}"
 
             }
 
