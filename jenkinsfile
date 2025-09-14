@@ -175,6 +175,22 @@ pipeline{
                 
             )
         }
+
+        abort{
+
+
+            emailext(
+                subject: "⚠️ Abort: ${JOB_NAME} #${BUILD_NUMBER}",
+                body: getEmailBody("FAILURE"),
+                mimeType: 'text/html',
+                to: "${RECIPIENTS}",
+                attachmentsPattern: 'npm-audit-report.json,trivy_scan_ouput.txt' 
+                
+                
+            )
+
+
+        }
     }
 }
 // Function to load HTML email body
